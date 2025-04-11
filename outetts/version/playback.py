@@ -3,6 +3,7 @@ import torchaudio
 from loguru import logger
 import numpy as np
 import os
+from io import BytesIO
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 try: 
@@ -23,7 +24,7 @@ class ModelOutput:
         resampler = torchaudio.transforms.Resample(orig_freq=og_sr, new_freq=to_sr).to(audio.device)
         return resampler(audio)
 
-    def save(self, path: str):
+    def save(self, path: str | BytesIO):
         if self.audio is None:
             logger.warning("Audio is empty, skipping save.")
             return
@@ -36,10 +37,8 @@ class ModelOutput:
             if audio_2d.dim() == 1:
                 audio_2d = audio_2d.unsqueeze(0)
 
-        if not path.endswith(".wav"):
-            path += ".wav"
 
-        torchaudio.save(path, audio_2d, sample_rate=self.sr, encoding='PCM_S', bits_per_sample=16)
+        torchaudio.save(path, audio_2d, sample_rate=self.sr, encoding='PCM_S', bits_per_sample=16, format = "wav")
         logger.info(f"Saved audio to: {path}")
 
     def _sounddevice(self):
